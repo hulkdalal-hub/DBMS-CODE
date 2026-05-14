@@ -1,211 +1,165 @@
-// =========================================
-// MongoDB Aggregation and Indexing
-// NoSQL Database Introduction
-// =========================================
+import java.util.Scanner;
 
-// =========================================
-// 1. CREATE DATABASE
-// =========================================
+public class Main {
 
-use StudentDB;
+    // Display Array
+    public static void display(int[] arr) {
 
-// =========================================
-// 2. CREATE COLLECTION AND INSERT DATA
-// =========================================
+        System.out.println("Array Elements:");
 
-db.users.insertMany([
-    {
-        name: "Alice",
-        age: 21,
-        sales: 5000,
-        city: "Delhi"
-    },
-    {
-        name: "Bob",
-        age: 25,
-        sales: 7000,
-        city: "Mumbai"
-    },
-    {
-        name: "Charlie",
-        age: 23,
-        sales: 6500,
-        city: "Delhi"
-    },
-    {
-        name: "Aditya",
-        age: 22,
-        sales: 8000,
-        city: "Pune"
-    }
-]);
-
-// =========================================
-// 3. CRUD OPERATIONS
-// =========================================
-
-/*
------------------------------------------
-CREATE
------------------------------------------
-*/
-
-db.users.insertOne({
-    name: "Rahul",
-    age: 24,
-    sales: 7200,
-    city: "Mumbai"
-});
-
-/*
------------------------------------------
-READ
------------------------------------------
-*/
-
-// Display all records
-db.users.find();
-
-// Filter records by city
-db.users.find({ city: "Delhi" });
-
-// Find users with sales greater than 6000
-db.users.find({ sales: { $gt: 6000 } });
-
-/*
------------------------------------------
-UPDATE
------------------------------------------
-*/
-
-db.users.updateOne(
-    { name: "Alice" },
-    { $set: { sales: 5500 } }
-);
-
-// Update multiple records
-db.users.updateMany(
-    { city: "Mumbai" },
-    { $set: { city: "Mumbai City" } }
-);
-
-/*
------------------------------------------
-DELETE
------------------------------------------
-*/
-
-// Delete one record
-db.users.deleteOne({ name: "Charlie" });
-
-// Delete multiple records
-db.users.deleteMany({ city: "Mumbai City" });
-
-// =========================================
-// 4. AGGREGATION QUERIES
-// =========================================
-
-/*
------------------------------------------
-1. Calculate Average Age
------------------------------------------
-*/
-
-db.users.aggregate([
-    {
-        $group: {
-            _id: null,
-            average_age: { $avg: "$age" }
+        for (int num : arr) {
+            System.out.print(num + " ");
         }
+
+        System.out.println();
     }
-]);
 
-/*
------------------------------------------
-2. Calculate Total Sales
------------------------------------------
-*/
+    // Find Maximum
+    public static int findMax(int[] arr) {
 
-db.users.aggregate([
-    {
-        $group: {
-            _id: null,
-            total_sales: { $sum: "$sales" }
+        int max = arr[0];
+
+        for (int num : arr) {
+
+            if (num > max) {
+                max = num;
+            }
         }
+
+        return max;
     }
-]);
 
-/*
------------------------------------------
-3. Sales by City
------------------------------------------
-*/
+    // Find Minimum
+    public static int findMin(int[] arr) {
 
-db.users.aggregate([
-    {
-        $group: {
-            _id: "$city",
-            total_city_sales: { $sum: "$sales" }
+        int min = arr[0];
+
+        for (int num : arr) {
+
+            if (num < min) {
+                min = num;
+            }
         }
+
+        return min;
     }
-]);
 
-/*
------------------------------------------
-4. Highest Sales
------------------------------------------
-*/
+    // Calculate Sum
+    public static int calculateSum(int[] arr) {
 
-db.users.aggregate([
-    {
-        $group: {
-            _id: null,
-            highest_sales: { $max: "$sales" }
+        int sum = 0;
+
+        for (int num : arr) {
+            sum += num;
         }
+
+        return sum;
     }
-]);
 
-/*
------------------------------------------
-5. Sort Users by Sales
------------------------------------------
-*/
+    // Search Element
+    public static int searchElement(int[] arr, int key) {
 
-db.users.aggregate([
-    {
-        $sort: { sales: -1 }
+        for (int i = 0; i < arr.length; i++) {
+
+            if (arr[i] == key) {
+                return i; // return index
+            }
+        }
+
+        return -1; // not found
     }
-]);
 
-// =========================================
-// 5. CREATE INDEX
-// =========================================
+    public static void main(String[] args) {
 
-// Create index on city field
-db.users.createIndex({ city: 1 });
+        Scanner sc = new Scanner(System.in);
 
-// Create index on sales field
-db.users.createIndex({ sales: 1 });
+        System.out.print("Enter number of elements: ");
 
-// =========================================
-// 6. CHECK INDEXES
-// =========================================
+        int n = sc.nextInt();
 
-db.users.getIndexes();
+        int[] arr = new int[n];
 
-// =========================================
-// 7. PERFORMANCE CHECK
-// =========================================
+        System.out.println("Enter elements:");
 
-// Explain query execution
-db.users.find({ city: "Delhi" }).explain("executionStats");
+        for (int i = 0; i < n; i++) {
+            arr[i] = sc.nextInt();
+        }
 
-// =========================================
-// 8. DISPLAY FINAL DATA
-// =========================================
+        int choice;
 
-db.users.find().pretty();
+        do {
 
-// =========================================
-// END OF PRACTICAL
-// =========================================
+            System.out.println("\n===== ARRAY MENU =====");
+
+            System.out.println("1. Display Elements");
+            System.out.println("2. Find Maximum");
+            System.out.println("3. Find Minimum");
+            System.out.println("4. Calculate Sum and Average");
+            System.out.println("5. Search Element");
+            System.out.println("6. Exit");
+
+            System.out.print("Enter choice: ");
+
+            choice = sc.nextInt();
+
+            switch (choice) {
+
+                case 1:
+
+                    display(arr);
+                    break;
+
+                case 2:
+
+                    System.out.println("Maximum: " + findMax(arr));
+                    break;
+
+                case 3:
+
+                    System.out.println("Minimum: " + findMin(arr));
+                    break;
+
+                case 4:
+
+                    int sum = calculateSum(arr);
+
+                    double avg = (double) sum / arr.length;
+
+                    System.out.println("Sum: " + sum);
+                    System.out.println("Average: " + avg);
+
+                    break;
+
+                case 5:
+
+                    System.out.print("Enter element to search: ");
+
+                    int key = sc.nextInt();
+
+                    int index = searchElement(arr, key);
+
+                    if (index != -1) {
+                        System.out.println("Element found at index: " + index);
+                    }
+
+                    else {
+                        System.out.println("Element not found.");
+                    }
+
+                    break;
+
+                case 6:
+
+                    System.out.println("Exiting...");
+                    break;
+
+                default:
+
+                    System.out.println("Invalid choice.");
+            }
+
+        } while (choice != 6);
+
+        sc.close();
+    }
+}
