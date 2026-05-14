@@ -1,245 +1,155 @@
--- =========================================
--- Student Course Management System
--- Views and Indexing in MySQL
--- =========================================
+import java.util.ArrayList;
+import java.util.Scanner;
 
--- Create Database
-CREATE DATABASE CollegeDB;
+class Product {
 
--- Use Database
-USE CollegeDB;
+    private String name;
+    private double price;
+    private int quantity;
+    private String category;
 
--- =========================================
--- 1. CREATE TABLES
--- =========================================
+    // Constructor 1
+    public Product(String name, double price) {
+        this.name = name;
+        this.price = price;
+        this.quantity = 1;
+        this.category = "General";
+    }
 
--- Student Table
-CREATE TABLE Student (
-    StudentID INT PRIMARY KEY,
-    Name VARCHAR(100),
-    Email VARCHAR(100),
-    Age INT,
-    Address VARCHAR(200)
-);
+    // Constructor 2
+    public Product(String name, double price, int quantity) {
+        this.name = name;
+        this.price = price;
+        this.quantity = quantity;
+        this.category = "General";
+    }
 
--- Instructor Table
-CREATE TABLE Instructor (
-    InstructorID INT PRIMARY KEY,
-    Name VARCHAR(100),
-    Email VARCHAR(100),
-    Department VARCHAR(100)
-);
+    // Constructor 3
+    public Product(String name, double price, int quantity, String category) {
+        this.name = name;
+        this.price = price;
+        this.quantity = quantity;
+        this.category = category;
+    }
 
--- Course Table
-CREATE TABLE Course (
-    CourseID INT PRIMARY KEY,
-    CourseName VARCHAR(100),
-    Credits INT,
-    InstructorID INT,
-    FOREIGN KEY (InstructorID) REFERENCES Instructor(InstructorID)
-);
+    public double getTotalPrice() {
+        return price * quantity;
+    }
 
--- Enrollment Table
-CREATE TABLE Enrollment (
-    EnrollmentID INT PRIMARY KEY,
-    StudentID INT,
-    CourseID INT,
-    EnrollmentDate DATE,
-    FOREIGN KEY (StudentID) REFERENCES Student(StudentID),
-    FOREIGN KEY (CourseID) REFERENCES Course(CourseID)
-);
+    public String getCategory() {
+        return category;
+    }
 
--- =========================================
--- 2. INSERT SAMPLE DATA
--- =========================================
+    public String toString() {
+        return name + "\t" + price + "\t" + quantity + "\t" + getTotalPrice();
+    }
+}
 
--- Insert into Student
-INSERT INTO Student VALUES
-(1, 'Aditya', 'aditya@gmail.com', 20, 'Pune'),
-(2, 'Rahul', 'rahul@gmail.com', 21, 'Mumbai'),
-(3, 'Aman', 'aman@gmail.com', 19, 'Nashik'),
-(4, 'Sneha', 'sneha@gmail.com', 22, 'Delhi');
+class Order {
 
--- Insert into Instructor
-INSERT INTO Instructor VALUES
-(101, 'Dr Sharma', 'sharma@gmail.com', 'Computer Science'),
-(102, 'Prof Mehta', 'mehta@gmail.com', 'Information Technology');
+    private ArrayList<Product> productList = new ArrayList<>();
 
--- Insert into Course
-INSERT INTO Course VALUES
-(201, 'DBMS', 4, 101),
-(202, 'Data Structures', 5, 101),
-(203, 'Java Programming', 3, 102);
+    public void addProduct(Product p) {
+        productList.add(p);
+    }
 
--- Insert into Enrollment
-INSERT INTO Enrollment VALUES
-(1, 1, 201, '2026-05-12'),
-(2, 1, 202, '2026-05-12'),
-(3, 2, 201, '2026-05-12'),
-(4, 3, 203, '2026-05-12'),
-(5, 4, 202, '2026-05-12');
+    public double calculateTotal() {
 
--- =========================================
--- 3. CREATE VIEW
--- =========================================
+        double total = 0;
 
-CREATE VIEW StudentCourseView AS
-SELECT
-    S.StudentID,
-    S.Name AS StudentName,
-    C.CourseName,
-    C.Credits,
-    I.Name AS InstructorName
-FROM Student S
-JOIN Enrollment E
-ON S.StudentID = E.StudentID
-JOIN Course C
-ON E.CourseID = C.CourseID
-JOIN Instructor I
-ON C.InstructorID = I.InstructorID;
+        for (Product p : productList) {
+            total += p.getTotalPrice();
+        }
 
--- Display View
-SELECT * FROM StudentCourseView;
+        return total;
+    }
 
--- =========================================
--- 4. UPDATE USING VIEW
--- =========================================
+    public double applyDiscount(double total) {
 
-UPDATE Course
-SET Credits = 5
-WHERE CourseName = 'Data Structures';
+        double discount = 0;
 
--- Check Updated Data
-SELECT * FROM StudentCourseView;
+        if (total > 5000) {
+            discount = total * 0.15; // 15% discount
+        }
 
--- =========================================
--- 5. CREATE INDEXES
--- =========================================
+        else if (total > 3000) {
+            discount = total * 0.10; // 10% discount
+        }
 
-CREATE INDEX idx_student_name
-ON Student(Name);
+        else if (total > 1000) {
+            discount = total * 0.05; // 5% discount
+        }
 
-CREATE INDEX idx_course_name
-ON Course(CourseName);
+        return discount;
+    }
 
-CREATE INDEX idx_enrollment_student
-ON Enrollment(StudentID);
+    public void generateInvoice() {
 
--- =========================================
--- 6. CHECK QUERY PERFORMANCE
--- =========================================
+        double total = calculateTotal();
+        double discount = applyDiscount(total);
+        double finalAmount = total - discount;
 
--- Before/After Indexing
-EXPLAIN
-SELECT * FROM Student
-WHERE Name = 'Aditya';
+        System.out.println("\n===== INVOICE =====");
+        System.out.println("Product\tPrice\tQty\tTotal");
 
-EXPLAIN
-SELECT * FROM Course
-WHERE CourseName = 'DBMS';
+        for (Product p : productList) {
+            System.out.println(p);
+        }
 
--- =========================================
--- 7. ADDITIONAL QUERIES
--- =========================================
+        System.out.println("------------------------------");
+        System.out.println("Total Amount: " + total);
+        System.out.println("Discount: " + discount);
+        System.out.println("Final Payable Amount: " + finalAmount);
+        System.out.println("==============================");
+    }
+}
 
--- 1. Total students enrolled in each course
-SELECT
-    C.CourseName,
-    COUNT(E.StudentID) AS Total_Students
-FROM Course C
-LEFT JOIN Enrollment E
-ON C.CourseID = E.CourseID
-GROUP BY C.CourseName;
+public class Main {
 
--- 2. Youngest student under each instructor
-SELECT
-    I.InstructorID,
-    I.Name AS InstructorName,
-    S.StudentID,
-    S.Name AS StudentName,
-    S.Age
-FROM Instructor I
-JOIN Course C
-ON I.InstructorID = C.InstructorID
-JOIN Enrollment E
-ON C.CourseID = E.CourseID
-JOIN Student S
-ON S.StudentID = E.StudentID
-WHERE S.Age = (
-    SELECT MIN(S2.Age)
-    FROM Course C2
-    JOIN Enrollment E2
-    ON C2.CourseID = E2.CourseID
-    JOIN Student S2
-    ON S2.StudentID = E2.StudentID
-    WHERE C2.InstructorID = I.InstructorID
-);
+    public static void main(String[] args) {
 
--- 3. Number of courses in each department
-SELECT
-    I.Department,
-    COUNT(C.CourseID) AS Total_Courses
-FROM Instructor I
-LEFT JOIN Course C
-ON I.InstructorID = C.InstructorID
-GROUP BY I.Department;
+        Scanner sc = new Scanner(System.in);
 
--- 4. Student details sorted by age
-SELECT
-    StudentID,
-    Name,
-    Email,
-    Age,
-    Address
-FROM Student
-ORDER BY Age ASC;
+        Order order = new Order();
 
--- 5. Students older than 20 in each course
-SELECT
-    S.StudentID,
-    S.Name,
-    S.Age,
-    C.CourseName
-FROM Student S
-JOIN Enrollment E
-ON S.StudentID = E.StudentID
-JOIN Course C
-ON C.CourseID = E.CourseID
-WHERE S.Age > 20
-ORDER BY C.CourseName;
+        // Predefined products using different constructors
+        Product p1 = new Product("Laptop", 45000);
+        Product p2 = new Product("Mouse", 500, 2);
+        Product p3 = new Product("Headphones", 1500, 1, "Electronics");
 
--- 6. Students along with enrolled courses
-SELECT
-    S.Name AS StudentName,
-    C.CourseName
-FROM Student S
-JOIN Enrollment E
-ON S.StudentID = E.StudentID
-JOIN Course C
-ON E.CourseID = C.CourseID;
+        order.addProduct(p1);
+        order.addProduct(p2);
+        order.addProduct(p3);
 
--- 7. Total enrollments per month
-SELECT
-    MONTH(EnrollmentDate) AS Month_Number,
-    COUNT(*) AS Total_Enrollments
-FROM Enrollment
-GROUP BY MONTH(EnrollmentDate);
+        System.out.print("Enter number of additional products: ");
 
--- 8. Instructors teaching more than 2 courses
-SELECT
-    I.Name AS InstructorName,
-    COUNT(C.CourseID) AS Total_Courses
-FROM Instructor I
-JOIN Course C
-ON I.InstructorID = C.InstructorID
-GROUP BY I.Name
-HAVING COUNT(C.CourseID) > 2;
+        int n = sc.nextInt();
+        sc.nextLine();
 
--- 9. Students whose names start with 'A'
-SELECT *
-FROM Student
-WHERE Name LIKE 'A%';
+        for (int i = 0; i < n; i++) {
 
--- =========================================
--- END OF PRACTICAL
--- =========================================
+            System.out.println("\nEnter product details:");
+
+            System.out.print("Name: ");
+            String name = sc.nextLine();
+
+            System.out.print("Price: ");
+            double price = sc.nextDouble();
+
+            System.out.print("Quantity: ");
+            int qty = sc.nextInt();
+            sc.nextLine();
+
+            System.out.print("Category: ");
+            String category = sc.nextLine();
+
+            Product userProduct = new Product(name, price, qty, category);
+
+            order.addProduct(userProduct);
+        }
+
+        order.generateInvoice();
+
+        sc.close();
+    }
+}
