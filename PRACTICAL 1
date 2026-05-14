@@ -1,71 +1,160 @@
--- Create Database
-CREATE DATABASE CollegeDB;
+import java.util.*;
 
--- Use Database
-USE CollegeDB;
+public class EngineeringCalculator {
 
--- Create Student Table
-CREATE TABLE Student (
-    StudentID INT PRIMARY KEY AUTO_INCREMENT,
-    Name VARCHAR(100),
-    Email VARCHAR(100) UNIQUE,
-    Age INT,
-    Address VARCHAR(200)
-);
+    public static void main(String[] args) {
 
--- Create Instructor Table
-CREATE TABLE Instructor (
-    InstructorID INT PRIMARY KEY AUTO_INCREMENT,
-    Name VARCHAR(100),
-    Email VARCHAR(100) UNIQUE,
-    Department VARCHAR(100)
-);
+        Scanner sc = new Scanner(System.in);
 
--- Create Course Table
-CREATE TABLE Course (
-    CourseID INT PRIMARY KEY AUTO_INCREMENT,
-    CourseName VARCHAR(100),
-    Credits INT,
-    InstructorID INT,
-    FOREIGN KEY (InstructorID) REFERENCES Instructor(InstructorID)
-);
+        System.out.println("=== Engineering Calculator ===");
 
--- Create Enrollment Table
-CREATE TABLE Enrollment (
-    EnrollmentID INT PRIMARY KEY AUTO_INCREMENT,
-    StudentID INT,
-    CourseID INT,
-    EnrollmentDate DATE,
-    FOREIGN KEY (StudentID) REFERENCES Student(StudentID),
-    FOREIGN KEY (CourseID) REFERENCES Course(CourseID)
-);
+        while (true) {
 
--- Insert Sample Data into Student
-INSERT INTO Student (Name, Email, Age, Address)
-VALUES
-('Aditya', 'aditya@gmail.com', 20, 'Pune'),
-('Rahul', 'rahul@gmail.com', 21, 'Mumbai');
+            try {
 
--- Insert Sample Data into Instructor
-INSERT INTO Instructor (Name, Email, Department)
-VALUES
-('Dr. Sharma', 'sharma@gmail.com', 'Computer Science'),
-('Prof. Mehta', 'mehta@gmail.com', 'Information Technology');
+                System.out.print("\nEnter expression (or type 'exit' to quit): ");
 
--- Insert Sample Data into Course
-INSERT INTO Course (CourseName, Credits, InstructorID)
-VALUES
-('DBMS', 4, 1),
-('Java Programming', 3, 2);
+                String input = sc.nextLine();
 
--- Insert Sample Data into Enrollment
-INSERT INTO Enrollment (StudentID, CourseID, EnrollmentDate)
-VALUES
-(1, 1, '2026-05-12'),
-(2, 2, '2026-05-12');
+                if (input.equalsIgnoreCase("exit")) {
+                    System.out.println("Calculator closed.");
+                    break;
+                }
 
--- Display Tables
-SELECT * FROM Student;
-SELECT * FROM Instructor;
-SELECT * FROM Course;
-SELECT * FROM Enrollment;
+                double result = evaluateExpression(input);
+
+                System.out.println("Result = " + result);
+
+            } catch (ArithmeticException ae) {
+
+                System.out.println("Math Error: " + ae.getMessage());
+
+            } catch (Exception e) {
+
+                System.out.println("Invalid Expression. Please try again.");
+            }
+        }
+
+        sc.close();
+    }
+
+    // Method to evaluate full expression
+    public static double evaluateExpression(String expression) {
+
+        Stack<Double> values = new Stack<>();
+        Stack<Character> operators = new Stack<>();
+
+        for (int i = 0; i < expression.length(); i++) {
+
+            char ch = expression.charAt(i);
+
+            if (Character.isWhitespace(ch))
+                continue;
+
+            if (Character.isDigit(ch)) {
+
+                StringBuilder sb = new StringBuilder();
+
+                while (i < expression.length() &&
+                        (Character.isDigit(expression.charAt(i)) ||
+                                expression.charAt(i) == '.')) {
+
+                    sb.append(expression.charAt(i));
+                    i++;
+                }
+
+                values.push(Double.parseDouble(sb.toString()));
+                i--;
+            }
+
+            else if (ch == '(') {
+
+                operators.push(ch);
+
+            }
+
+            else if (ch == ')') {
+
+                while (operators.peek() != '(') {
+
+                    values.push(applyOperation(
+                            operators.pop(),
+                            values.pop(),
+                            values.pop()));
+                }
+
+                operators.pop();
+            }
+
+            else if (isOperator(ch)) {
+
+                while (!operators.empty() &&
+                        precedence(ch) <= precedence(operators.peek())) {
+
+                    values.push(applyOperation(
+                            operators.pop(),
+                            values.pop(),
+                            values.pop()));
+                }
+
+                operators.push(ch);
+            }
+        }
+
+        while (!operators.empty()) {
+
+            values.push(applyOperation(
+                    operators.pop(),
+                    values.pop(),
+                    values.pop()));
+        }
+
+        return values.pop();
+    }
+
+    // Check valid operator
+    public static boolean isOperator(char ch) {
+
+        return ch == '+' || ch == '-' ||
+                ch == '*' || ch == '/';
+    }
+
+    // Operator precedence
+    public static int precedence(char op) {
+
+        if (op == '+' || op == '-')
+            return 1;
+
+        if (op == '*' || op == '/')
+            return 2;
+
+        return 0;
+    }
+
+    // Apply operation
+    public static double applyOperation(char op,
+                                        double b,
+                                        double a) {
+
+        switch (op) {
+
+            case '+':
+                return a + b;
+
+            case '-':
+                return a - b;
+
+            case '*':
+                return a * b;
+
+            case '/':
+
+                if (b == 0)
+                    throw new ArithmeticException("Division by zero");
+
+                return a / b;
+        }
+
+        return 0;
+    }
+}
