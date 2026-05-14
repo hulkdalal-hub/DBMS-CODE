@@ -1,165 +1,75 @@
-import java.util.Scanner;
+// Abstract class
+abstract class Employee {
 
+    protected String name;
+    protected double salary;
+
+    public Employee(String name, double salary) {
+
+        this.name = name;
+        this.salary = salary;
+    }
+
+    // Abstract method
+    abstract void calculateBonus();
+
+    // Concrete method
+    public void displayDetails() {
+
+        System.out.println("Employee Name: " + name);
+        System.out.println("Salary: " + salary);
+    }
+}
+
+// Subclass
+class Manager extends Employee {
+
+    public Manager(String name, double salary) {
+
+        super(name, salary);
+    }
+
+    @Override
+    void calculateBonus() {
+
+        double bonus = salary * 0.20;
+
+        System.out.println("Bonus: " + bonus);
+    }
+}
+
+// Another Subclass
+class Developer extends Employee {
+
+    public Developer(String name, double salary) {
+
+        super(name, salary);
+    }
+
+    @Override
+    void calculateBonus() {
+
+        double bonus = salary * 0.10;
+
+        System.out.println("Bonus: " + bonus);
+    }
+}
+
+// Main Class
 public class Main {
-
-    // Display Array
-    public static void display(int[] arr) {
-
-        System.out.println("Array Elements:");
-
-        for (int num : arr) {
-            System.out.print(num + " ");
-        }
-
-        System.out.println();
-    }
-
-    // Find Maximum
-    public static int findMax(int[] arr) {
-
-        int max = arr[0];
-
-        for (int num : arr) {
-
-            if (num > max) {
-                max = num;
-            }
-        }
-
-        return max;
-    }
-
-    // Find Minimum
-    public static int findMin(int[] arr) {
-
-        int min = arr[0];
-
-        for (int num : arr) {
-
-            if (num < min) {
-                min = num;
-            }
-        }
-
-        return min;
-    }
-
-    // Calculate Sum
-    public static int calculateSum(int[] arr) {
-
-        int sum = 0;
-
-        for (int num : arr) {
-            sum += num;
-        }
-
-        return sum;
-    }
-
-    // Search Element
-    public static int searchElement(int[] arr, int key) {
-
-        for (int i = 0; i < arr.length; i++) {
-
-            if (arr[i] == key) {
-                return i; // return index
-            }
-        }
-
-        return -1; // not found
-    }
 
     public static void main(String[] args) {
 
-        Scanner sc = new Scanner(System.in);
+        Employee e1 = new Manager("Rahul", 80000);
 
-        System.out.print("Enter number of elements: ");
+        Employee e2 = new Developer("Aditya", 50000);
 
-        int n = sc.nextInt();
+        e1.displayDetails();
+        e1.calculateBonus();
 
-        int[] arr = new int[n];
+        System.out.println();
 
-        System.out.println("Enter elements:");
-
-        for (int i = 0; i < n; i++) {
-            arr[i] = sc.nextInt();
-        }
-
-        int choice;
-
-        do {
-
-            System.out.println("\n===== ARRAY MENU =====");
-
-            System.out.println("1. Display Elements");
-            System.out.println("2. Find Maximum");
-            System.out.println("3. Find Minimum");
-            System.out.println("4. Calculate Sum and Average");
-            System.out.println("5. Search Element");
-            System.out.println("6. Exit");
-
-            System.out.print("Enter choice: ");
-
-            choice = sc.nextInt();
-
-            switch (choice) {
-
-                case 1:
-
-                    display(arr);
-                    break;
-
-                case 2:
-
-                    System.out.println("Maximum: " + findMax(arr));
-                    break;
-
-                case 3:
-
-                    System.out.println("Minimum: " + findMin(arr));
-                    break;
-
-                case 4:
-
-                    int sum = calculateSum(arr);
-
-                    double avg = (double) sum / arr.length;
-
-                    System.out.println("Sum: " + sum);
-                    System.out.println("Average: " + avg);
-
-                    break;
-
-                case 5:
-
-                    System.out.print("Enter element to search: ");
-
-                    int key = sc.nextInt();
-
-                    int index = searchElement(arr, key);
-
-                    if (index != -1) {
-                        System.out.println("Element found at index: " + index);
-                    }
-
-                    else {
-                        System.out.println("Element not found.");
-                    }
-
-                    break;
-
-                case 6:
-
-                    System.out.println("Exiting...");
-                    break;
-
-                default:
-
-                    System.out.println("Invalid choice.");
-            }
-
-        } while (choice != 6);
-
-        sc.close();
+        e2.displayDetails();
+        e2.calculateBonus();
     }
 }
